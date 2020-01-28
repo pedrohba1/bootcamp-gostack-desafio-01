@@ -6,6 +6,11 @@ require("./utils/utils.js")();
 
 //TODO: Criar os middlewares:
 
+function checkProjectExists(req, res, next) {}
+
+//contagem de requisições feitas
+function countReq(req, res, next) {}
+
 //listar todos os projetos
 server.get("/projects", (req, res) => {
   return res.json(projects);
