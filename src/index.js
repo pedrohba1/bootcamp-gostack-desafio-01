@@ -2,14 +2,26 @@ const express = require("express");
 const server = express();
 const projects = require("./database/projects");
 server.use(express.json());
+var counter = 0;
 require("./utils/utils.js")();
 
-//TODO: Criar os middlewares:
+//checa a existência do projeto
+function checkProjectExists(req, res, next) {
+  const { index } = findElement(projects, "id", req.params.id);
+  if (index === -1) {
+    return res.status(400).json("projeto não existe");
+  }
 
-function checkProjectExists(req, res, next) {}
+  return next();
+}
 
 //contagem de requisições feitas
-function countReq(req, res, next) {}
+function countReq(req, res, next) {
+  counter++;
+  console.log("number of requests: " + counter);
+  return next();
+}
+server.use(countReq);
 
 //listar todos os projetos
 server.get("/projects", (req, res) => {
@@ -25,7 +37,7 @@ server.post("/projects", (req, res) => {
 });
 
 //adicionar tasks à um projeto específico
-server.post("/projects/:id/tasks", (req, res) => {
+server.post("/projects/:id/tasks", checkProjectExists, (req, res) => {
   const { index } = findElement(projects, "id", req.params.id);
   const { task_title } = req.body;
   //acrescenta uma task
@@ -35,7 +47,7 @@ server.post("/projects/:id/tasks", (req, res) => {
 });
 
 //alterar projeto de acordo com id
-server.put("/projects/:id", (req, res) => {
+server.put("/projects/:id", checkProjectExists, (req, res) => {
   const { index } = findElement(projects, "id", req.params.id);
   const { title } = req.body;
   //altera o titulo do projeto
@@ -45,7 +57,7 @@ server.put("/projects/:id", (req, res) => {
 });
 
 //deleta um projeto baseado no id
-server.delete("/projects/:id", (req, res) => {
+server.delete("/projects/:id", checkProjectExists, (req, res) => {
   const { element, index } = findElement(projects, "id", req.params.id);
   projects.splice(index, 1);
   return res.json({ "deleted project": element });
